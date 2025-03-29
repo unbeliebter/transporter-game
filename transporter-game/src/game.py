@@ -1,7 +1,10 @@
+import math
+
 import pygame
 import sys
 
 from src.entity import Entity
+from src.gamestats import Gamestats
 
 # Initialisierung von Pygame
 pygame.init()
@@ -24,13 +27,17 @@ small_font = pygame.font.Font(None, 24)
 # Entities
 truck = Entity(75, 100, 500, 500, "resources/truck.png")
 gas_station = Entity(200, 200, 750, 500, "resources/gas_station.png")
-mineral = Entity(50, 50, 100, 100, "resources/mineral.png")
+mineral = Entity(50, 50, 150, 150, "resources/mineral.png")
+mine = Entity(200, 200, 100, 100, "resources/mine.png",)
+fabric = Entity(200, 200, 900, 200, "resources/fabric.png")
+helicopter = Entity(100, 100, 700, 200, "resources/helicopter.png")
+
 entity_settings = {
     "capacity": "100",
     "consumption_truck": "10",
     "mineral_amount": "10",
-    "speed_truck": "100",
-    "speed_helicopter": "100",
+    "speed_truck": "5.0",
+    "speed_helicopter": "3.0",
     "win_percentage": "80",
 }
 
@@ -80,6 +87,7 @@ def start_screen(entity_settings):
 
 # Spiel-Funktion (einfaches Beispiel)
 def game_loop(entity_settings):
+    game_stats = Gamestats(truck, helicopter, entity_settings)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -87,39 +95,66 @@ def game_loop(entity_settings):
                 sys.exit()
 
         screen.fill("white")
-
-        rotation_angle = 0
-        # Bild drehen
-        image = pygame.transform.rotate(original_image, rotation_angle)
-        image_rect = image.get_rect(center=image_rect.center)
-
-
-    keys = pygame.key.get_pressed()
-        if keys[pygame.K_w]:
-            truck.pos.y -= 300 * dt
-            rotation_angle += 180
-        if keys[pygame.K_s]:
-            truck.pos.y += 300 * dt
-            rotation_angle -= 180
-        if keys[pygame.K_a]:
-            truck.pos.x -= 300 * dt
-            rotation_angle += 90
-        if keys[pygame.K_d]:
-            truck.pos.x += 300 * dt
-            rotation_angle -= 90
-
         gas_station.draw(screen)
-        truck.draw(screen)
+        mine.draw(screen)
         mineral.draw(screen)
+        fabric.draw(screen)
+        helicopter.draw(screen)
 
-        # flip() the display to put your work on screen
+        keys = pygame.key.get_pressed()
+        if any(keys):
+            if keys[pygame.K_w]:
+                truck.pos.y -= 300 * dt
+                rotated_truck, rotated_rect = rotate_image(truck, 180)
+                screen.blit(rotated_truck, rotated_rect)
+            if keys[pygame.K_s]:
+                truck.pos.y += 300 * dt
+                rotated_truck, rotated_rect = rotate_image(truck, 0)
+                screen.blit(rotated_truck, rotated_rect)
+            if keys[pygame.K_a]:
+                truck.pos.x -= 300 * dt
+                rotated_truck, rotated_rect = rotate_image(truck, 270)
+                screen.blit(rotated_truck, rotated_rect)
+            if keys[pygame.K_d]:
+                truck.pos.x += 300 * dt
+                rotated_truck, rotated_rect = rotate_image(truck, 90)
+                screen.blit(rotated_truck, rotated_rect)
+        else:
+            truck.draw(screen)
+
+        track_truck(helicopter.pos, truck.pos, entity_settings["speed_helicopter"])
+
+        # Kollision prüfen // muss
+        check_collision(helicopter.pos, truck.pos)
+
+    # flip() the display to put your work on screen
         pygame.display.flip()
 
-        # limits FPS to 60
-        # dt is delta time in seconds since last frame, used for framerate-
-        # independent physics.
+    # limits FPS to 60
+    # dt is delta time in seconds since last frame, used for framerate-
+    # independent physics.
         dt = clock.tick(60) / 1000
 
+def rotate_image(enity, angle):
+    rotated_image = pygame.transform.rotate(enity.image, angle)
+    rotated_rect = rotated_image.get_rect(center=enity.pos.center)
+
+    return rotated_image, rotated_rect
+
+def track_truck(helicopter_rect, truck_rect, speed):
+    dx = truck_rect.centerx - helicopter_rect.centerx
+    dy = truck_rect.centery - helicopter_rect.centery
+    distance = math.sqrt(dx**2 + dy**2)
+    if distance != 0:
+        direction_x = dx / distance
+        direction_y = dy / distance
+        helicopter_rect.x += direction_x * float(speed)
+        helicopter_rect.y += direction_y * float(speed)
+
+def check_collision(helicopter_rect, item_rect):
+    if helicopter_rect.colliderect(item_rect):
+        return True
+    return False
 
 # Einstellungen-Funktion(einfaches Beispiel)
 def settings_screen(entity_settings):
