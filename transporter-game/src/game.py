@@ -10,7 +10,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 running = True
 dt = 0
-pygame.display.set_caption("Startbildschirm")
+pygame.display.set_caption("Transporterspiel")
 
 # Farben
 WHITE = (255, 255, 255)
@@ -34,6 +34,7 @@ entity_settings = {
     "win_percentage": "80",
 }
 
+
 # Schaltflächen-Funktion
 def draw_button(screen, text, x, y, width, height, color, text_color):
     pygame.draw.rect(screen, color, (x, y, width, height))
@@ -42,6 +43,7 @@ def draw_button(screen, text, x, y, width, height, color, text_color):
     screen.blit(text_surface, text_rect)
     return pygame.Rect(x, y, width, height)
 
+
 # Schieberegler-Funktion
 def draw_text_input(screen, text, x, y, width, height, color, text_color, active):
     pygame.draw.rect(screen, color, (x, y, width, height), 2)
@@ -49,8 +51,9 @@ def draw_text_input(screen, text, x, y, width, height, color, text_color, active
     screen.blit(text_surface, (x + 5, y + 5))
     return pygame.Rect(x, y, width, height)
 
+
 # Startbildschirm-Funktion
-def start_screen():
+def start_screen(entity_settings):
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -58,9 +61,9 @@ def start_screen():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if start_button.collidepoint(event.pos):
-                    game_loop()  # Wechsel zum Spiel
+                    game_loop(entity_settings)  # Wechsel zum Spiel
                 elif settings_button.collidepoint(event.pos):
-                    settings_screen()
+                    settings_screen(entity_settings)
                 elif quit_button.collidepoint(event.pos):
                     pygame.quit()
                     sys.exit()
@@ -74,8 +77,9 @@ def start_screen():
 
         pygame.display.flip()
 
+
 # Spiel-Funktion (einfaches Beispiel)
-def game_loop():
+def game_loop(entity_settings):
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -84,15 +88,25 @@ def game_loop():
 
         screen.fill("white")
 
-        keys = pygame.key.get_pressed()
+        rotation_angle = 0
+        # Bild drehen
+        image = pygame.transform.rotate(original_image, rotation_angle)
+        image_rect = image.get_rect(center=image_rect.center)
+
+
+    keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
             truck.pos.y -= 300 * dt
+            rotation_angle += 180
         if keys[pygame.K_s]:
             truck.pos.y += 300 * dt
+            rotation_angle -= 180
         if keys[pygame.K_a]:
             truck.pos.x -= 300 * dt
+            rotation_angle += 90
         if keys[pygame.K_d]:
             truck.pos.x += 300 * dt
+            rotation_angle -= 90
 
         gas_station.draw(screen)
         truck.draw(screen)
@@ -106,8 +120,9 @@ def game_loop():
         # independent physics.
         dt = clock.tick(60) / 1000
 
+
 # Einstellungen-Funktion(einfaches Beispiel)
-def settings_screen():
+def settings_screen(entity_settings):
     text_inputs = {}
     active_input = None
 
@@ -119,9 +134,9 @@ def settings_screen():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 active_input = None
                 if save_button.collidepoint(event.pos):
-                    game_loop()
+                    game_loop(entity_settings)
                 elif back_button.collidepoint(event.pos):
-                    start_screen()
+                    start_screen(entity_settings)
                 for setting, rect in text_inputs.items():
                     if rect.collidepoint(event.pos):
                         active_input = setting
@@ -144,9 +159,10 @@ def settings_screen():
             y_offset += 50
 
             save_button = draw_button(screen, "Speichern und Spiel starten", 200, 600, 400, 50, GRAY, BLACK)
-            back_button = draw_button(screen, "Zurück", 700, 600, 200, 50, GRAY, BLACK)
+            back_button = draw_button(screen, "Speichern und Zurück", 700, 600, 300, 50, GRAY, BLACK)
 
         pygame.display.flip()
 
+
 # Starten des Startbildschirms
-start_screen()
+start_screen(entity_settings)
