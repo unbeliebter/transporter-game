@@ -29,7 +29,7 @@ xtra_small_font = pygame.font.Font(None, 17)
 
 entity_settings = {
     "capacity": "100",
-    "consumption_truck": "10",
+    "consumption_truck": "10.0",
     "mineral_amount": "10",
     "speed_truck": "5.0",
     "speed_helicopter": "2.0",
@@ -37,15 +37,15 @@ entity_settings = {
 }
 
 # Entities
-truck = Vehicle(100, entity_settings["capacity"], False, 75, 100, 500, 500, "resources/truck.png")
+truck = Vehicle(100, entity_settings["capacity"], False, float(entity_settings["consumption_truck"]) / 100,  75, 100, 500, 500, "resources/truck.png")
 gas_station = Entity(200, 200, 750, 500, "resources/gas_station.png")
 mineral = Entity( 50, 50, 150, 150, "resources/mineral.png")
 mine = Counter(int(entity_settings["mineral_amount"]), int(entity_settings["mineral_amount"]), 200, 200, 100, 100, "resources/mine.png",)
 fabric = Counter(int(int(entity_settings["mineral_amount"]) * (float(entity_settings["win_percentage"])) / 100), 0, 200, 200, 900, 200, "resources/fabric.png")
-helicopter = Vehicle(0, 0, False, 100, 100, 700, 200, "resources/helicopter.png")
+helicopter = Vehicle(0, 0, False, 0, 100, 100, 700, 200, "resources/helicopter.png")
 
 
-# Schaltflächen-Funktionwwwwwwwwww
+# Schaltflächen-Funktion
 def draw_button(screen, text, x, y, width, height, color, text_color):
     pygame.draw.rect(screen, color, (x, y, width, height))
     text_surface = font.render(text, True, text_color)
@@ -78,7 +78,10 @@ def start_screen(entity_settings):
                     pygame.quit()
                     sys.exit()
 
-        screen.fill(WHITE)
+        background_image = pygame.image.load("resources/start_screen.png")
+        scaled_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
+
+        screen.blit(scaled_image, (0,0))
 
         # Schaltflächen
         start_button = draw_button(screen, "Start", WIDTH // 2 - 100, HEIGHT // 2 - 100, 200, 50, GRAY, BLACK)
@@ -154,6 +157,23 @@ def game_loop(entity_settings):
         if truck.pos.colliderect(gas_station.pos):
             truck.act_tank = 100
 
+        if truck.pos.left < 0:
+            truck.pos.left = 0
+        if truck.pos.right > WIDTH:
+            truck.pos.right = WIDTH
+        if truck.pos.top < 0:
+            truck.pos.top = 0
+        if truck.pos.bottom > HEIGHT:
+            truck.pos.bottom = HEIGHT
+
+        truck.act_tank -= truck.tank_loss
+        if truck.act_tank < 0:
+            truck.act_tank = 0
+
+        if truck.act_tank == 0:
+            game_stats.game_over = True
+            show_game_over(game_stats.game_over)
+
         pygame.draw.rect(screen, GRAY, stats_rect, 2)
 
         # Spielstatistiken rendern
@@ -162,7 +182,7 @@ def game_loop(entity_settings):
         text_speed_helicopter = xtra_small_font.render(f"Heli-Geschw.: {entity_settings["speed_helicopter"]}", True, BLACK)
         text_speed_truck = xtra_small_font.render(f"LKW-Geschw.: {entity_settings["speed_truck"]}", True, BLACK)
         text_direction_truck = xtra_small_font.render(f"LKW-Richtung: {truck.heading}", True, BLACK)
-        text_truck_tank = xtra_small_font.render(f"LKW-Tank: {((truck.act_tank / int(truck.max_tank)) * 100)}%", True, BLACK)
+        text_truck_tank = xtra_small_font.render(f"LKW-Tank: {int(((truck.act_tank / int(truck.max_tank)) * 100))}%", True, BLACK)
         text_mineral_truck = xtra_small_font.render(f"LKW-Mineral: {truck.has_mineral}", True, BLACK)
         text_mineral_mine = xtra_small_font.render(f"Mine-Mineral: {mine.act_items} / {mine.max_items}", True,
                                         BLACK)
@@ -254,16 +274,10 @@ def settings_screen(entity_settings):
         pygame.display.flip()
 
 # Funktion zum Anzeigen des Gewinner-/Verliererfensters
-def show_game_over(win=True):
-    running = True
+def show_game_over(game_over):
 
-    while running:
+    while True:
         for event in pygame.event.get():
-            # Schaltflächen
-            button_replay = draw_button(screen, "Nochmal spielen", WIDTH // 2 - 100, HEIGHT // 2 - 100, 200, 50, GRAY, BLACK)
-            button_menu = draw_button(screen, "Zum Hauptmenü", WIDTH // 2 - 100, HEIGHT // 2, 200, 50, GRAY, BLACK)
-            button_close = draw_button(screen, "Schließen", WIDTH // 2 - 100, HEIGHT // 2 + 100, 200, 50, GRAY, BLACK)
-
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
@@ -277,14 +291,19 @@ def show_game_over(win=True):
                 elif button_menu.collidepoint(event.pos):
                     start_screen(entity_settings)
 
-        screen.fill(WHITE)
-
-        if win:
-            text = font.render("Du hast gewonnen!", True, BLACK)
+        if game_over:
+            background_image = pygame.image.load("resources/game_over_lose.jpg")
+            scaled_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
+            screen.blit(scaled_image, (0, 0))
         else:
-            text = font.render("Du hast verloren!", True, BLACK)
+            background_image = pygame.image.load("resources/game_over_win.jpg")
+            scaled_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
+            screen.blit(scaled_image, (0, 0))
 
-        screen.blit(text, (WIDTH // 2 - text.get_width() // 2, 200))
+        button_replay = draw_button(screen, "Nochmal spielen", WIDTH // 2 - 100, HEIGHT // 2 - 100, 200, 50, GRAY, BLACK)
+        button_menu = draw_button(screen, "Zum Hauptmenü", WIDTH // 2 - 100, HEIGHT // 2, 200, 50, GRAY, BLACK)
+        button_close = draw_button(screen, "Schließen", WIDTH // 2 - 100, HEIGHT // 2 + 100, 200, 50, GRAY, BLACK)
+
         pygame.display.flip()
 
 # Starten des Startbildschirms
