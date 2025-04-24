@@ -78,10 +78,7 @@ def start_screen(entity_settings):
                     pygame.quit()
                     sys.exit()
 
-        background_image = pygame.image.load("resources/start_screen.png")
-        scaled_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
-
-        screen.blit(scaled_image, (0,0))
+        screen.fill("white")
 
         # Schaltflächen
         start_button = draw_button(screen, "Start", WIDTH // 2 - 100, HEIGHT // 2 - 100, 200, 50, GRAY, BLACK)
@@ -146,13 +143,16 @@ def game_loop(entity_settings):
             if truck.has_mineral:
                 truck.has_mineral = False
                 helicopter.has_mineral = True
+                helicopter.pos.x = 700
+                helicopter.pos.y = 200
 
         if truck.has_mineral:
             mineral_truck = Entity(50, 50, truck.pos.x + 40, truck.pos.y + 40, "resources/mineral.png")
             mineral_truck.draw(screen)
-        elif helicopter.has_mineral:
-            mineral_heli = Entity(50, 50, helicopter.pos.x + 40, helicopter.pos.y + 40, "resources/mineral.png")
-            mineral_heli.draw(screen)
+
+#        elif helicopter.has_mineral:
+#            mineral_heli = Entity(50, 50, helicopter.pos.x + 40, helicopter.pos.y + 40, "resources/mineral.png")
+#            mineral_heli.draw(screen)
 
         if truck.pos.colliderect(gas_station.pos):
             truck.act_tank = 100
@@ -292,13 +292,17 @@ def show_game_over(game_over):
                     start_screen(entity_settings)
 
         if game_over:
-            background_image = pygame.image.load("resources/game_over_lose.jpg")
-            scaled_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
-            screen.blit(scaled_image, (0, 0))
+            text_surface = font.render("Du hast verloren!", True, BLACK)
+            text_rect = text_surface.get_rect()
+            text_rect.center = (WIDTH // 2, HEIGHT // 4)
+            screen.fill("white")
+            screen.blit(text_surface, text_rect)
         else:
-            background_image = pygame.image.load("resources/game_over_win.jpg")
-            scaled_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
-            screen.blit(scaled_image, (0, 0))
+            text_surface = font.render("Du hast gewonnen!", True, BLACK)
+            text_rect = text_surface.get_rect()
+            text_rect.center = (WIDTH // 2, HEIGHT // 4)
+            screen.fill("white")
+            screen.blit(text_surface, text_rect)
 
         button_replay = draw_button(screen, "Nochmal spielen", WIDTH // 2 - 100, HEIGHT // 2 - 100, 200, 50, GRAY, BLACK)
         button_menu = draw_button(screen, "Zum Hauptmenü", WIDTH // 2 - 100, HEIGHT // 2, 200, 50, GRAY, BLACK)
