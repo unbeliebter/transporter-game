@@ -2,7 +2,7 @@ import pygame
 from pygame import Surface, Rect, transform
 
 
-class Entity:
+class BaseEntity:
     image = Surface
     pos = Rect
 

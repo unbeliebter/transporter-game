@@ -1,14 +1,14 @@
-from pygame import Rect
+from pygame import Rect, Vector2
 
-from src.entity import Entity
+from src.baseEntity import BaseEntity
 
 
-class Vehicle(Entity):
+class Vehicle(BaseEntity):
     act_tank = 0
     max_tank = 100
     tank_loss = 0.1
     has_mineral = False
-    heading = Rect
+    heading = "Stehend"
 
     def __init__(self, act_tank, max_tank, has_mineral, tank_loss, width, height, pos_x, pos_y, image_path):
         super().__init__(width, height, pos_x, pos_y, image_path)

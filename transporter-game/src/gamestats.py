@@ -25,7 +25,7 @@ class Gamestats:
         self.speed_truck = entity_settings["speed_truck"]
         self.direction_truck = Rect(0, 0, 1, 1)
         self.truck_tank_max = entity_settings["speed_truck"]
-        self.truck_tank_actual = 0                                  # todo
+        self.truck_tank_actual = 0
         self.mineral_truck = False
         self.mineral_mine = 0
         self.mineral_mine_start = 0

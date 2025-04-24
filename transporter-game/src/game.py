@@ -4,9 +4,10 @@ import pygame
 import sys
 
 from src.counter import Counter
-from src.entity import Entity
+from src.baseEntity import BaseEntity
 from src.gamestats import Gamestats
 from src.vehicle import Vehicle
+from src.helper import get_direction_string
 
 # Initialisierung von Pygame
 pygame.init()
@@ -38,8 +39,8 @@ entity_settings = {
 
 # Entities
 truck = Vehicle(100, entity_settings["capacity"], False, float(entity_settings["consumption_truck"]) / 100,  75, 100, 500, 500, "resources/truck.png")
-gas_station = Entity(200, 200, 750, 500, "resources/gas_station.png")
-mineral = Entity( 50, 50, 150, 150, "resources/mineral.png")
+gas_station = BaseEntity(200, 200, 750, 500, "resources/gas_station.png")
+mineral = BaseEntity(50, 50, 150, 150, "resources/mineral.png")
 mine = Counter(int(entity_settings["mineral_amount"]), int(entity_settings["mineral_amount"]), 200, 200, 100, 100, "resources/mine.png",)
 fabric = Counter(int(int(entity_settings["mineral_amount"]) * (float(entity_settings["win_percentage"])) / 100), 0, 200, 200, 900, 200, "resources/fabric.png")
 helicopter = Vehicle(0, 0, False, 0, 100, 100, 700, 200, "resources/helicopter.png")
@@ -107,25 +108,37 @@ def game_loop(entity_settings):
         helicopter.draw(screen)
 
         keys = pygame.key.get_pressed()
+        move_x, move_y = 0, 0
         if any(keys):
             if keys[pygame.K_w]:
                 truck.pos.y -= 300 * dt
+                move_y -= 1
                 rotated_truck, rotated_rect = rotate_image(truck, 180)
                 screen.blit(rotated_truck, rotated_rect)
             if keys[pygame.K_s]:
                 truck.pos.y += 300 * dt
+                move_y += 1
                 rotated_truck, rotated_rect = rotate_image(truck, 0)
                 screen.blit(rotated_truck, rotated_rect)
             if keys[pygame.K_a]:
                 truck.pos.x -= 300 * dt
+                move_x -= 1
                 rotated_truck, rotated_rect = rotate_image(truck, 270)
                 screen.blit(rotated_truck, rotated_rect)
             if keys[pygame.K_d]:
                 truck.pos.x += 300 * dt
+                move_x += 1
                 rotated_truck, rotated_rect = rotate_image(truck, 90)
                 screen.blit(rotated_truck, rotated_rect)
         else:
             truck.draw(screen)
+
+        if move_x != 0 or move_y != 0:
+            angle_rad = math.atan2(move_y, move_x)
+            angle_deg = math.degrees(angle_rad)
+            truck.heading = get_direction_string(angle_deg)
+        else:
+            truck.heading = "Stehend"
 
         if truck.pos.colliderect(mine.pos):
             if not truck.has_mineral:
@@ -147,7 +160,7 @@ def game_loop(entity_settings):
                 helicopter.pos.y = 200
 
         if truck.has_mineral:
-            mineral_truck = Entity(50, 50, truck.pos.x + 40, truck.pos.y + 40, "resources/mineral.png")
+            mineral_truck = BaseEntity(50, 50, truck.pos.x + 40, truck.pos.y + 40, "resources/mineral.png")
             mineral_truck.draw(screen)
 
 #        elif helicopter.has_mineral:

@@ -1,9 +1,9 @@
 from pygame import Rect
 
-from src.entity import Entity
+from src.baseEntity import BaseEntity
 
 
-class Counter(Entity):
+class Counter(BaseEntity):
     max_items = 0
     act_items = 0
 
