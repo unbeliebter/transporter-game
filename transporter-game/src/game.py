@@ -40,6 +40,7 @@ stats_rect = pygame.Rect(10, base.HEIGHT - 200, 250, 190)
 # Das Spiel und dessen Logik
 def game_loop(entity_settings):
     game_stats = Gamestats(truck, helicopter, entity_settings)
+    action_after_game = "menu"
     run = True
 
     while run:
@@ -111,10 +112,6 @@ def game_loop(entity_settings):
             mineral_truck = BaseEntity(50, 50, truck.pos.x + 40, truck.pos.y + 40, "resources/mineral.png")
             mineral_truck.draw(base.screen)
 
-#        elif helicopter.has_mineral:
-#            mineral_heli = Entity(50, 50, helicopter.pos.x + 40, helicopter.pos.y + 40, "resources/mineral.png")
-#            mineral_heli.draw(screen)
-
         if truck.pos.colliderect(gas_station.pos):
             truck.act_tank = 100
 
@@ -130,11 +127,6 @@ def game_loop(entity_settings):
         truck.act_tank -= truck.tank_loss
         if truck.act_tank < 0:
             truck.act_tank = 0
-
-        if truck.act_tank == 0:
-            game_stats.game_over = True
-            show_game_over(game_stats.game_over, "Der Tank ist leer gegangen")
-            run = False
 
         pygame.draw.rect(base.screen, base.GRAY, stats_rect, 2)
 
@@ -165,19 +157,22 @@ def game_loop(entity_settings):
     # flip() the display to put your work on screen
         pygame.display.flip()
 
-        if fabric.act_items == fabric.max_items:
-            show_game_over(game_stats.game_over, "Das Ziel der mindest Mineralien wurde erreicht")
-            run = False
-
-        if mine.act_items == 0 and fabric.act_items != fabric.max_items:
-            game_stats.game_over = True
-            show_game_over(game_stats.game_over, "Du hast nicht genug Mineralien, um das Ziel zu erreichen")
-            run = False
+        if truck.act_tank == 0:
+            action_after_game = show_game_over(True, "Der Tank ist leer gegangen")
+            run = False  # Beende die game_loop
+        elif fabric.act_items == fabric.max_items:  # Use elif to avoid multiple game_over calls
+            action_after_game = show_game_over(False,
+                                               "Das Ziel der mindest Mineralien wurde erreicht")  # game_over=False for win
+            run = False  # Beende die game_loop
+        elif mine.act_items == 0 and fabric.act_items != fabric.max_items:
+            action_after_game = show_game_over(True, "Du hast nicht genug Mineralien, um das Ziel zu erreichen")
+            run = False  # Beende die game_loop
 
     # limits FPS to 60
     # dt is delta time in seconds since last frame, used for framerate-
     # independent physics.
         dt = clock.tick(60) / 1000
+    return action_after_game
 
 def track_truck(helicopter_rect, truck_rect, speed):
     dx = truck_rect.centerx - helicopter_rect.centerx
@@ -189,108 +184,199 @@ def track_truck(helicopter_rect, truck_rect, speed):
         helicopter_rect.x += direction_x * float(speed)
         helicopter_rect.y += direction_y * float(speed)
 
-def show_game_over(game_over, label):
+def show_game_over(game_over_flag, label):
+    running_game_over_screen = True
+    while running_game_over_screen:
+        # --- 1. Zeichnen des Hintergrunds und Textes ---
+        base.screen.fill("white")
+        if game_over_flag:
+             text_surface = base.font.render("Du hast verloren! " + label, True, base.BLACK)
+        else:
+             text_surface = base.font.render("Du hast gewonnen! " + label, True, base.BLACK)
+        text_rect = text_surface.get_rect(center=(base.WIDTH // 2, base.HEIGHT // 4))
+        base.screen.blit(text_surface, text_rect)
 
-    while True:
+        # --- 2. Buttons zeichnen UND deren Rects für DIESEN Frame speichern ---
+        button_replay_rect = helper.draw_button(base.screen, "Nochmal spielen", base.WIDTH // 2 - 100, base.HEIGHT // 2 - 100, 200, 50, base.GRAY, base.BLACK)
+        button_menu_rect = helper.draw_button(base.screen, "Zum Hauptmenü", base.WIDTH // 2 - 100, base.HEIGHT // 2, 200, 50, base.GRAY, base.BLACK)
+        button_close_rect = helper.draw_button(base.screen, "Schließen", base.WIDTH // 2 - 100, base.HEIGHT // 2 + 100, 200, 50, base.GRAY, base.BLACK)
+
+        # --- 3. Event Handling ---
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                return
+                return "quit"
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if button_close.collidepoint(event.pos):
-                    pygame.quit()
-                    return
-                elif button_replay.collidepoint(event.pos):
-                    game_loop(entity_settings)
-                elif button_menu.collidepoint(event.pos):
-                    start_screen(entity_settings)
+                # --- 4. Kollision mit den GESPEICHERTEN Rects prüfen ---
+                if button_close_rect.collidepoint(event.pos):
+                    running_game_over_screen = False
+                    return "quit" # Signal to quit
+                elif button_replay_rect.collidepoint(event.pos):
+                    running_game_over_screen = False
+                    return "replay" # Signal to replay
+                elif button_menu_rect.collidepoint(event.pos):
+                    running_game_over_screen = False
+                    return "menu" # Signal to go to menu
 
-        if game_over:
-            text_surface = base.font.render("Du hast verloren! " + label, True, base.BLACK)
-            text_rect = text_surface.get_rect()
-            text_rect.center = (base.WIDTH // 2, base.HEIGHT // 4)
-            base.screen.fill("white")
-            base.screen.blit(text_surface, text_rect)
-        else:
-            text_surface = base.font.render("Du hast gewonnen! " + label, True, base.BLACK)
-            text_rect = text_surface.get_rect()
-            text_rect.center = (base.WIDTH // 2, base.HEIGHT // 4)
-            base.screen.fill("white")
-            base.screen.blit(text_surface, text_rect)
-
-        button_replay = helper.draw_button(base.screen, "Nochmal spielen", base.WIDTH // 2 - 100, base.HEIGHT // 2 - 100, 200, 50, base.GRAY, base.BLACK)
-        button_menu = helper.draw_button(base.screen, "Zum Hauptmenü", base.WIDTH // 2 - 100, base.HEIGHT // 2, 200, 50, base.GRAY, base.BLACK)
-        button_close = helper.draw_button(base.screen, "Schließen", base.WIDTH // 2 - 100, base.HEIGHT // 2 + 100, 200, 50, base.GRAY, base.BLACK)
-
+        # --- 5. Display aktualisieren ---
         pygame.display.flip()
 
 # Einstellungen-Funktion(einfaches Beispiel)
 def settings_screen(entity_settings):
     text_inputs = {}
     active_input = None
+    # Need local copy of settings to allow changes without affecting current game until saved
+    local_settings = entity_settings.copy()
 
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                active_input = None
-                if save_button.collidepoint(event.pos):
-                    game_loop(entity_settings)
-                elif back_button.collidepoint(event.pos):
-                    start_screen(entity_settings)
-                for setting, rect in text_inputs.items():
-                    if rect.collidepoint(event.pos):
-                        active_input = setting
-            if event.type == pygame.KEYDOWN and active_input:
-                if event.key == pygame.K_RETURN:
-                    active_input = None
-                elif event.key == pygame.K_BACKSPACE:
-                    entity_settings[active_input] = entity_settings[active_input][:-1]
-                else:
-                    entity_settings[active_input] += event.unicode
-
+        # --- Zeichnen des Einstellungsbildschirms (Buttons und Inputs hier zeichnen!) ---
         base.screen.fill(base.WHITE)
         y_offset = 50
-        for setting, value in entity_settings.items():
+        # Use local_settings for displaying and editing
+        for setting, value in local_settings.items():
             text_surface = base.small_font.render(f"{setting}:", True, base.BLACK)
             base.screen.blit(text_surface, (50, y_offset))
+            # Draw text input and get its Rect
             text_inputs[setting] = helper.draw_text_input(
                 base.screen, value, 300, y_offset, 100, 30, base.GRAY, base.BLACK, active_input == setting
             )
             y_offset += 50
 
-            save_button = helper.draw_button(base.screen, "Speichern und Spiel starten", 200, 600, 400, 50, base.GRAY, base.BLACK)
-            back_button = helper.draw_button(base.screen, "Speichern und Zurück", 700, 600, 300, 50, base.GRAY, base.BLACK)
+        # Buttons zeichnen UND deren Rects für DIESEN Frame speichern
+        save_button_rect = helper.draw_button(base.screen, "Speichern und Spiel starten", 200, 600, 400, 50, base.GRAY, base.BLACK)
+        back_button_rect = helper.draw_button(base.screen, "Speichern und Zurück", 700, 600, 300, 50, base.GRAY, base.BLACK)
 
+
+        # --- Event Handling ---
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return "quit" # Signal to quit from settings
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                active_input = None # Deactivate current input on any mouse click not on an input box
+
+                # Kollision mit den GESPEICHERTEN Button Rects prüfen
+                if save_button_rect.collidepoint(event.pos):
+                    # Apply settings back to the main settings dict (or return them)
+                    entity_settings.update(local_settings) # Update the main settings
+                    print("Einstellungen gespeichert. Starte Spiel...")
+                    return "start_game" # Signal to start game with new settings
+                elif back_button_rect.collidepoint(event.pos):
+                    # Apply settings
+                    entity_settings.update(local_settings) # Update the main settings
+                    print("Einstellungen gespeichert. Zurück zum Menü...")
+                    return "menu" # Signal to go back to menu
+
+                # Check collision for text inputs *after* checking buttons
+                # This part is already done correctly in your original code's logic flow
+                for setting, rect in text_inputs.items():
+                    if rect.collidepoint(event.pos):
+                        active_input = setting
+                        print(f"Active input: {active_input}") # Debug print
+
+            if event.type == pygame.KEYDOWN and active_input:
+                if event.key == pygame.K_RETURN:
+                    active_input = None
+                elif event.key == pygame.K_BACKSPACE:
+                    local_settings[active_input] = local_settings[active_input][:-1]
+                else:
+                    # Only allow numeric input for specific settings if needed
+                    # if active_input in ["capacity", "mineral_amount", "win_percentage"]:
+                    #     if event.unicode.isdigit():
+                    #         local_settings[active_input] += event.unicode
+                    # elif active_input in ["consumption_truck", "speed_truck", "speed_helicopter"]:
+                    #      if event.unicode.isdigit() or event.unicode == '.':
+                    #          local_settings[active_input] += event.unicode
+                    # else: # Allow any character for other settings (if any)
+                    #     local_settings[active_input] += event.unicode
+                    local_settings[active_input] += event.unicode # Keeping original simple keydown handling
+
+
+        # --- Display aktualisieren ---
         pygame.display.flip()
+
 
 # Der Startbildschirm und dessen Buttons
 def start_screen(entity_settings):
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if start_button.collidepoint(event.pos):
-                    game_loop(entity_settings)  # Wechsel zum Spiel
-                elif settings_button.collidepoint(event.pos):
-                    settings_screen(entity_settings)
-                elif quit_button.collidepoint(event.pos):
-                    pygame.quit()
-                    sys.exit()
-
+        # --- Zeichnen des Startbildschirms (Buttons hier zeichnen!) ---
         base.screen.fill("white")
 
-        # Definitionen der Buttons des Startbildschirms
-        start_button = helper.draw_button(base.screen, "Start", base.WIDTH // 2 - 100, base.HEIGHT // 2 - 100, 200, 50, base.GRAY, base.BLACK)
-        settings_button = helper.draw_button(base.screen, "Einstellungen", base.WIDTH // 2 - 100, base.HEIGHT // 2, 200, 50, base.GRAY, base.BLACK)
-        quit_button = helper.draw_button(base.screen, "Schließen", base.WIDTH // 2 - 100, base.HEIGHT // 2 + 100, 200, 50, base.GRAY, base.BLACK)
+        # Buttons zeichnen UND deren Rects für DIESEN Frame speichern
+        start_button_rect = helper.draw_button(base.screen, "Start", base.WIDTH // 2 - 100, base.HEIGHT // 2 - 100, 200, 50, base.GRAY, base.BLACK)
+        settings_button_rect = helper.draw_button(base.screen, "Einstellungen", base.WIDTH // 2 - 100, base.HEIGHT // 2, 200, 50, base.GRAY, base.BLACK)
+        quit_button_rect = helper.draw_button(base.screen, "Schließen", base.WIDTH // 2 - 100, base.HEIGHT // 2 + 100, 200, 50, base.GRAY, base.BLACK)
 
+        # --- Event Handling ---
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return "quit" # Signal to quit from start screen
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # Kollision mit den GESPEICHERTEN Rects prüfen
+                if start_button_rect.collidepoint(event.pos):
+                    print("Starte Spiel...") # Debug print
+                    return "start_game" # Signal to start game
+                elif settings_button_rect.collidepoint(event.pos):
+                    print("Gehe zu Einstellungen...") # Debug print
+                    return "settings" # Signal to go to settings
+                elif quit_button_rect.collidepoint(event.pos):
+                    print("Schließe Spiel...") # Debug print
+                    return "quit" # Signal to quit
+
+        # --- Display aktualisieren ---
         pygame.display.flip()
 
-# Starten des Startbildschirms
-start_screen(entity_settings)
+def reset_game_state(settings):
+    global truck, mine, fabric, helicopter # Muss globale Variablen deklarieren, wenn sie neu zugewiesen werden
+    # Oder besser: Die __init__ Methoden auf den bestehenden Objekten aufrufen, falls das möglich ist
+    # truck.__init__(100, settings["capacity"], False, float(settings["consumption_truck"]) / 100,  75, 100, 500, 500, "resources/truck.png")
+    # mine.__init__(int(settings["mineral_amount"]), int(settings["mineral_amount"]), 200, 200, 100, 100, "resources/mine.png")
+    # fabric.__init__(int(int(settings["mineral_amount"]) * (float(settings["win_percentage"])) / 100), 0, 200, 200, 900, 200, "resources/fabric.png")
+    # helicopter.__init__(0, 0, False, 0, 100, 100, 700, 200, "resources/helicopter.png")
+    # Wenn die Klassen __init__ keine Neupositionierung machen, musst du die pos-Attribute manuell zurücksetzen:
+    truck.pos.x, truck.pos.y = 500, 500
+    truck.act_tank = 100
+    truck.has_mineral = False
+    truck.tank_loss = float(settings["consumption_truck"]) / 100 # Aus Settings übernehmen
+
+    mine.max_items = int(settings["mineral_amount"]) # Aus Settings übernehmen
+    mine.act_items = int(settings["mineral_amount"]) # Auf Max zurücksetzen
+
+    fabric.max_items = int(int(settings["mineral_amount"]) * (float(settings["win_percentage"])) / 100) # Aus Settings übernehmen
+    fabric.act_items = 0 # Auf 0 zurücksetzen
+
+    helicopter.pos.x, helicopter.pos.y = 700, 200 # Auf Startposition zurücksetzen
+    helicopter.has_mineral = False # Helikopter hat kein Mineral am Start
+
+    # gas_station und mineral müssen wahrscheinlich nicht zurückgesetzt werden, da sie sich nicht ändern
+
+# Hauptfunktion zur Verwaltung der Spielzustände
+def main():
+    current_state = "menu" # Start with the menu
+    game_settings = entity_settings.copy() # Use a copy of settings
+
+    while current_state != "quit":
+        if current_state == "menu":
+            current_state = start_screen(game_settings) # start_screen returns next state
+        elif current_state == "settings":
+            current_state = settings_screen(game_settings) # settings_screen returns next state
+        elif current_state == "start_game":
+            # --- SPIELZUSTAND ZURÜCKSETZEN VOR DEM START ---
+            reset_game_state(game_settings)
+            current_state = "game" # Now enter the game loop
+        elif current_state == "game":
+            # game_loop returns the action requested after game end
+            action_after_game = game_loop(game_settings)
+            # Handle the action returned by game_loop
+            if action_after_game == "replay":
+                current_state = "start_game" # Go back to "start_game" state to trigger reset and restart
+            elif action_after_game == "menu":
+                current_state = "menu" # Go back to menu
+            elif action_after_game == "quit":
+                current_state = "quit" # Quit the main loop
+
+    pygame.quit()
+    sys.exit()
+
+# Starten der Hauptfunktion
+if __name__ == "__main__":
+    main()
