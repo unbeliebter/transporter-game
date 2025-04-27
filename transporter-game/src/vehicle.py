@@ -1,4 +1,4 @@
-from src.baseEntity import BaseEntity
+from baseEntity import BaseEntity
 
 # Klasse für den LKW
 class Vehicle(BaseEntity):

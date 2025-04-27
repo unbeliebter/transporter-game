@@ -1,4 +1,4 @@
-from src.baseEntity import BaseEntity
+from baseEntity import BaseEntity
 
 # Ist eine zusätzliche Klasse, um zu Erfassen für die Mine und die Fabrik wie viele Mineralien diese haben und Benötigen
 # Die Klasse ansich erbt von BaseEntity

@@ -1,4 +1,4 @@
-import pygame
+import pygame, pathlib
 
 # Diese Klasse besitzt Standarddaten, die von mehreren Klassen genutzt werden, wie bspw. Schriftarten
 
@@ -16,3 +16,7 @@ GRAY = (200, 200, 200)
 font = pygame.font.Font(None, 36)
 small_font = pygame.font.Font(None, 24)
 xtra_small_font = pygame.font.Font(None, 17)
+
+# Pfade
+relpath = pathlib.Path(__file__).parent
+resources_path = relpath / "resources"

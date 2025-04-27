@@ -4,11 +4,11 @@ import pygame
 import sys
 
 from src import helper, base
-from src.counter import Counter
-from src.baseEntity import BaseEntity
-from src.gamestats import Gamestats
-from src.vehicle import Vehicle
-from src.helper import get_direction_string
+from baseEntity import BaseEntity
+from gamestats import Gamestats
+from counter import Counter
+from vehicle import Vehicle
+from helper import get_direction_string
 
 # Initialisierung von Pygame und Basisvariablen
 pygame.init()
@@ -28,12 +28,12 @@ entity_settings = {
 }
 
 # Alle Entity-Definitionen
-truck = Vehicle(100, entity_settings["capacity"], False, float(entity_settings["consumption_truck"]) / 100,  75, 100, 500, 500, "resources/truck.png")
-gas_station = BaseEntity(200, 200, 750, 500, "resources/gas_station.png")
-mineral = BaseEntity(50, 50, 150, 150, "resources/mineral.png")
-mine = Counter(int(entity_settings["mineral_amount"]), int(entity_settings["mineral_amount"]), 200, 200, 100, 100, "resources/mine.png",)
-fabric = Counter(int(int(entity_settings["mineral_amount"]) * (float(entity_settings["win_percentage"])) / 100), 0, 200, 200, 900, 200, "resources/fabric.png")
-helicopter = Vehicle(0, 0, False, 0, 100, 100, 700, 200, "resources/helicopter.png")
+truck = Vehicle(100, entity_settings["capacity"], False, float(entity_settings["consumption_truck"]) / 100,  75, 100, 500, 500, base.resources_path / "truck.png")
+gas_station = BaseEntity(200, 200, 750, 500, base.resources_path / "gas_station.png")
+mineral = BaseEntity(50, 50, 150, 150, base.resources_path / "mineral.png")
+mine = Counter(int(entity_settings["mineral_amount"]), int(entity_settings["mineral_amount"]), 200, 200, 100, 100, base.resources_path / "mine.png",)
+fabric = Counter(int(int(entity_settings["mineral_amount"]) * (float(entity_settings["win_percentage"])) / 100), 0, 200, 200, 900, 200, base.resources_path / "fabric.png")
+helicopter = Vehicle(0, 0, False, 0, 100, 100, 700, 200, base.resources_path / "helicopter.png")
 
 # Setzen des Rechtecks für die Spielinformationen im Fenster unten links
 stats_rect = pygame.Rect(10, base.HEIGHT - 200, 250, 190)
