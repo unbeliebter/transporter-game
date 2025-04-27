@@ -1,5 +1,8 @@
 import pygame
 
+# Diese Klasse besitzt Standarddaten, die von mehreren Klassen genutzt werden, wie bspw. Schriftarten
+
+# Bildschirmauflösung
 WIDTH, HEIGHT = 1280, 720
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.init()

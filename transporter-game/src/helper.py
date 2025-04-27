@@ -1,7 +1,9 @@
 import pygame
 
 from src import base
+# Eine Helper-Klasse mit allen Funktionen, die öfter benutzt werden, um in der Hauptklasse Code zu sparen
 
+# Methode, um zu bestimmen in welche Richtung bspw. der LKW zeigt
 def get_direction_string(angle_degrees):
     angle = (angle_degrees + 360) % 360
 
@@ -22,9 +24,9 @@ def get_direction_string(angle_degrees):
     elif 292.5 <= angle < 337.5:
         return "Nordosten"
     else:
-        return "Unbekannt" # Sollte bei normalen Winkeln nicht vorkommen
+        return "Unbekannt"
 
-# Schaltflächen-Funktion
+# Erstellt einen Button für das GUI
 def draw_button(screen, text, x, y, width, height, color, text_color):
     pygame.draw.rect(screen, color, (x, y, width, height))
     text_surface = base.font.render(text, True, text_color)
@@ -32,13 +34,14 @@ def draw_button(screen, text, x, y, width, height, color, text_color):
     screen.blit(text_surface, text_rect)
     return pygame.Rect(x, y, width, height)
 
-# Schieberegler-Funktion
+# Füllt ein Feld mit gegebenen Text, für die Einstellungen
 def draw_text_input(screen, text, x, y, width, height, color, text_color, active):
     pygame.draw.rect(screen, color, (x, y, width, height), 2)
     text_surface = base.small_font.render(text, True, text_color)
     screen.blit(text_surface, (x + 5, y + 5))
     return pygame.Rect(x, y, width, height)
 
+# Bewegt ein Bild je nach Zustand, hier das Bild damit der LKW immer in eine Richtung fährt
 def rotate_image(entity, angle):
     rotated_image = pygame.transform.rotate(entity.image, angle)
     rotated_rect = rotated_image.get_rect(center=entity.pos.center)

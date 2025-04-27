@@ -1,6 +1,6 @@
 from pygame import Rect
 
-
+# Diese Klasse erfasst alle Spielstatistiken und dient für die Ausgabe im GUI während des Spiels um bspw. den Tankfüllstand anzuzeigen
 class Gamestats:
     pos_helicopter = Rect
     pos_truck = Rect

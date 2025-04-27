@@ -1,7 +1,7 @@
 import pygame
 from pygame import Surface, Rect, transform
 
-
+# BasisEntity für alle Objekte, die sich die gleichen Attribute teilen
 class BaseEntity:
     image = Surface
     pos = Rect

@@ -1,8 +1,6 @@
-from pygame import Rect, Vector2
-
 from src.baseEntity import BaseEntity
 
-
+# Klasse für den LKW
 class Vehicle(BaseEntity):
     act_tank = 0
     max_tank = 100
