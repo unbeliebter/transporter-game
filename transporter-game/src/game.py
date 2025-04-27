@@ -40,8 +40,9 @@ stats_rect = pygame.Rect(10, base.HEIGHT - 200, 250, 190)
 # Das Spiel und dessen Logik
 def game_loop(entity_settings):
     game_stats = Gamestats(truck, helicopter, entity_settings)
+    run = True
 
-    while True:
+    while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -132,7 +133,8 @@ def game_loop(entity_settings):
 
         if truck.act_tank == 0:
             game_stats.game_over = True
-            show_game_over(game_stats.game_over)
+            show_game_over(game_stats.game_over, "Der Tank ist leer gegangen")
+            run = False
 
         pygame.draw.rect(base.screen, base.GRAY, stats_rect, 2)
 
@@ -164,11 +166,13 @@ def game_loop(entity_settings):
         pygame.display.flip()
 
         if fabric.act_items == fabric.max_items:
-            show_game_over(game_stats.game_over)
+            show_game_over(game_stats.game_over, "Das Ziel der mindest Mineralien wurde erreicht")
+            run = False
 
         if mine.act_items == 0 and fabric.act_items != fabric.max_items:
             game_stats.game_over = True
-            show_game_over(game_stats.game_over)
+            show_game_over(game_stats.game_over, "Du hast nicht genug Mineralien, um das Ziel zu erreichen")
+            run = False
 
     # limits FPS to 60
     # dt is delta time in seconds since last frame, used for framerate-
@@ -185,7 +189,7 @@ def track_truck(helicopter_rect, truck_rect, speed):
         helicopter_rect.x += direction_x * float(speed)
         helicopter_rect.y += direction_y * float(speed)
 
-def show_game_over(game_over):
+def show_game_over(game_over, label):
 
     while True:
         for event in pygame.event.get():
@@ -203,13 +207,13 @@ def show_game_over(game_over):
                     start_screen(entity_settings)
 
         if game_over:
-            text_surface = base.font.render("Du hast verloren!", True, base.BLACK)
+            text_surface = base.font.render("Du hast verloren! " + label, True, base.BLACK)
             text_rect = text_surface.get_rect()
             text_rect.center = (base.WIDTH // 2, base.HEIGHT // 4)
             base.screen.fill("white")
             base.screen.blit(text_surface, text_rect)
         else:
-            text_surface = base.font.render("Du hast gewonnen!", True, base.BLACK)
+            text_surface = base.font.render("Du hast gewonnen! " + label, True, base.BLACK)
             text_rect = text_surface.get_rect()
             text_rect.center = (base.WIDTH // 2, base.HEIGHT // 4)
             base.screen.fill("white")
