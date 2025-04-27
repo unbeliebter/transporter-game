@@ -176,18 +176,18 @@ def game_loop(entity_settings):
         # Spielende-Bedingungen
         # Wenn der Tank leer ist, so verliert man das Spiel
         if truck.act_tank == 0:
-            action_after_game = show_game_over(True, "Der Tank ist leer gegangen")
+            action_after_game = show_game_over(True, "Der Tank ist leer gegangen.")
             run = False
 
         # Wenn die Mineralien der Fabrik alle übergeben wurden, so gewinnt man das Spiel
         elif fabric.act_items == fabric.max_items:
             action_after_game = show_game_over(False,
-                                               "Das Ziel der mindest Mineralien wurde erreicht")
+                                               "Das Ziel der Mindestmineralien  wurde erreicht.")
             run = False
 
         #Wenn in der mine keine Mineralien mehr da sind und die Anzahl in der Fabrik nicht erreicht hat, so verliert man das Spiel
         elif mine.act_items == 0 and fabric.act_items != fabric.max_items:
-            action_after_game = show_game_over(True, "Du hast nicht genug Mineralien, um das Ziel zu erreichen")
+            action_after_game = show_game_over(True, "Du hattest nicht genug Mineralien, um das Ziel zu erreichen.")
             run = False
 
         # Limitiert das Spiel auf 60 Frames per Second
