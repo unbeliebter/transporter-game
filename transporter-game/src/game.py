@@ -23,7 +23,7 @@ entity_settings = {
     "consumption_truck": "10.0",
     "mineral_amount": "10",
     "speed_truck": "5.0",
-    "speed_helicopter": "2.0",
+    "speed_helicopter": "5.2",
     "win_percentage": "80",
 }
 
@@ -116,8 +116,8 @@ def game_loop(entity_settings):
             if truck.has_mineral:
                 truck.has_mineral = False
                 helicopter.has_mineral = True
-                helicopter.pos.x = 700
-                helicopter.pos.y = 200
+                helicopter.pos.x = -700
+                helicopter.pos.y = -200
 
         # Wenn der LKW ein Mineral bei der Fabrik geholt hat, wird das Mineral hier auf den LKW gezeichnet
         if truck.has_mineral:

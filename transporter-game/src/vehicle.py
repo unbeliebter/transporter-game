@@ -1,6 +1,6 @@
 from baseEntity import BaseEntity
 
-# Klasse für den LKW
+# Klasse für den LKW/Helicopter
 class Vehicle(BaseEntity):
     act_tank = 0
     max_tank = 100
