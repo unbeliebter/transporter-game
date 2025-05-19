@@ -3,10 +3,10 @@ import math
 import pygame
 import sys
 
-from src import helper, base
-from baseEntity import BaseEntity
 from gamestats import Gamestats
 from counter import Counter
+from src import base, helper
+from src.baseEntity import BaseEntity
 from vehicle import Vehicle
 from helper import get_direction_string
 
@@ -17,7 +17,7 @@ running = True
 dt = 0
 pygame.display.set_caption("Transporterspiel")
 
-#Die möglichen Einstellungen des Spiels als Dictionary
+# Die möglichen Einstellungen des Spiels als Dictionary
 entity_settings = {
     "capacity": "100",
     "consumption_truck": "10.0",
@@ -28,15 +28,19 @@ entity_settings = {
 }
 
 # Alle Entity-Definitionen
-truck = Vehicle(100, entity_settings["capacity"], False, float(entity_settings["consumption_truck"]) / 100,  75, 100, 500, 500, base.resources_path / "truck.png")
-gas_station = BaseEntity(200, 200, 750, 500, base.resources_path / "gas_station.png")
-mineral = BaseEntity(50, 50, 150, 150, base.resources_path / "mineral.png")
-mine = Counter(int(entity_settings["mineral_amount"]), int(entity_settings["mineral_amount"]), 200, 200, 100, 100, base.resources_path / "mine.png",)
-fabric = Counter(int(int(entity_settings["mineral_amount"]) * (float(entity_settings["win_percentage"])) / 100), 0, 200, 200, 900, 200, base.resources_path / "fabric.png")
-helicopter = Vehicle(0, 0, False, 0, 100, 100, 700, 200, base.resources_path / "helicopter.png")
+truck = Vehicle(100, entity_settings["capacity"], False, float(entity_settings["consumption_truck"]) / 100, 75, 100,
+                500, 500, "resources/truck.png")
+gas_station = BaseEntity(200, 200, 750, 500,  "resources/gas_station.png")
+mineral = BaseEntity(50, 50, 150, 150, "resources/mineral.png")
+mine = Counter(int(entity_settings["mineral_amount"]), int(entity_settings["mineral_amount"]), 200, 200, 100, 100,
+               "resources/mine.png", )
+fabric = Counter(int(int(entity_settings["mineral_amount"]) * (float(entity_settings["win_percentage"])) / 100), 0, 200,
+                 200, 900, 200, "resources/fabric.png")
+helicopter = Vehicle(0, 0, False, 0, 100, 100, 700, 200, "resources/helicopter.png")
 
 # Setzen des Rechtecks für die Spielinformationen im Fenster unten links
 stats_rect = pygame.Rect(10, base.HEIGHT - 200, 250, 190)
+
 
 # Das Spiel und dessen Logik
 def game_loop(entity_settings):
@@ -147,17 +151,21 @@ def game_loop(entity_settings):
         pygame.draw.rect(base.screen, base.GRAY, stats_rect, 2)
 
         # Spielstatistiken rendern
-        text_pos_helicopter = base.xtra_small_font.render(f"Heli-Pos: {helicopter.pos}", True, base.BLACK)
-        text_pos_truck = base.xtra_small_font.render(f"LKW-Pos: {truck.pos}", True, base.BLACK)
-        text_speed_helicopter = base.xtra_small_font.render(f"Heli-Geschw.: {entity_settings["speed_helicopter"]}", True, base.BLACK)
-        text_speed_truck = base.xtra_small_font.render(f"LKW-Geschw.: {entity_settings["speed_truck"]}", True, base.BLACK)
-        text_direction_truck = base.xtra_small_font.render(f"LKW-Richtung: {truck.heading}", True, base.BLACK)
-        text_truck_tank = base.xtra_small_font.render(f"LKW-Tank: {int(((truck.act_tank / int(truck.max_tank)) * 100))}%", True, base.BLACK)
-        text_mineral_truck = base.xtra_small_font.render(f"LKW-Mineral: {truck.has_mineral}", True, base.BLACK)
-        text_mineral_mine = base.xtra_small_font.render(f"Mine-Mineral: {mine.act_items} / {mine.max_items}", True,
-                                        base.BLACK)
+        text_pos_helicopter = base.xtra_small_font.render("Heli-Pos: {}".format(helicopter.pos), True, base.BLACK)
+        text_pos_truck = base.xtra_small_font.render("LKW-Pos: {}".format(truck.pos), True, base.BLACK)
+        text_speed_helicopter = base.xtra_small_font.render(
+            "Heli-Geschw.: {}".format(entity_settings["speed_helicopter"]), True, base.BLACK)
+        text_speed_truck = base.xtra_small_font.render("LKW-Geschw.: {}".format(entity_settings["speed_truck"]), True,
+                                                       base.BLACK)
+        text_direction_truck = base.xtra_small_font.render("LKW-Richtung: {}".format(truck.heading), True, base.BLACK)
+        text_truck_tank = base.xtra_small_font.render(
+            "LKW-Tank: {}%".format(int(((truck.act_tank / int(truck.max_tank)) * 100))), True, base.BLACK)
+        text_mineral_truck = base.xtra_small_font.render("LKW-Mineral: {}".format(truck.has_mineral), True, base.BLACK)
+        text_mineral_mine = base.xtra_small_font.render("Mine-Mineral: {} / {}".format(mine.act_items, mine.max_items),
+                                                        True,
+                                                        base.BLACK)
         text_mineral_fabric = base.xtra_small_font.render(
-            f"Fabrik-Mineral: {fabric.act_items} / {fabric.max_items}", True, base.BLACK)
+            "Fabrik-Mineral: {} / {}".format(fabric.act_items, fabric.max_items), True, base.BLACK)
 
         # Spielstatistiken auf dem Bildschirm anzeigen
         base.screen.blit(text_pos_helicopter, (stats_rect.x + 10, stats_rect.y + 10))
@@ -185,7 +193,7 @@ def game_loop(entity_settings):
                                                "Das Ziel der Mindestmineralien  wurde erreicht.")
             run = False
 
-        #Wenn in der mine keine Mineralien mehr da sind und die Anzahl in der Fabrik nicht erreicht hat, so verliert man das Spiel
+        # Wenn in der mine keine Mineralien mehr da sind und die Anzahl in der Fabrik nicht erreicht hat, so verliert man das Spiel
         elif mine.act_items == 0 and fabric.act_items != fabric.max_items:
             action_after_game = show_game_over(True, "Du hattest nicht genug Mineralien, um das Ziel zu erreichen.")
             run = False
@@ -195,17 +203,19 @@ def game_loop(entity_settings):
 
     return action_after_game
 
+
 # Methode, dass der Helikopter den LKW verfolgt
 def track_truck(helicopter_rect, truck_rect, speed):
     distance_x = truck_rect.centerx - helicopter_rect.centerx
     distance_y = truck_rect.centery - helicopter_rect.centery
-    distance = math.sqrt(distance_x**2 + distance_y**2)
+    distance = math.sqrt(distance_x ** 2 + distance_y ** 2)
     if distance != 0:
         direction_x = distance_x / distance
         direction_y = distance_y / distance
         # Bewegung des Helikopters
         helicopter_rect.x += direction_x * float(speed)
         helicopter_rect.y += direction_y * float(speed)
+
 
 # Bildschirm beim Gewinnen/Verlieren des Spiels mit benutzerdefiniertem Text
 def show_game_over(game_over_flag, text):
@@ -215,23 +225,26 @@ def show_game_over(game_over_flag, text):
         base.screen.fill("white")
         # Hier wird der Text gesetzt, ob man gewonnen/verloren hat inklusive Begründung
         if game_over_flag:
-             text_surface = base.font.render("Du hast verloren! " + text, True, base.BLACK)
+            text_surface = base.font.render("Du hast verloren! " + text, True, base.BLACK)
         else:
-             text_surface = base.font.render("Du hast gewonnen! " + text, True, base.BLACK)
+            text_surface = base.font.render("Du hast gewonnen! " + text, True, base.BLACK)
         text_rect = text_surface.get_rect(center=(base.WIDTH // 2, base.HEIGHT // 4))
         base.screen.blit(text_surface, text_rect)
 
         # Zeichnen der Buttons für den Game-Over-Bildschirm
-        button_replay_rect = helper.draw_button(base.screen, "Nochmal spielen", base.WIDTH // 2 - 100, base.HEIGHT // 2 - 100, 200, 50, base.GRAY, base.BLACK)
-        button_menu_rect = helper.draw_button(base.screen, "Zum Hauptmenü", base.WIDTH // 2 - 100, base.HEIGHT // 2, 200, 50, base.GRAY, base.BLACK)
-        button_close_rect = helper.draw_button(base.screen, "Schließen", base.WIDTH // 2 - 100, base.HEIGHT // 2 + 100, 200, 50, base.GRAY, base.BLACK)
+        button_replay_rect = helper.draw_button(base.screen, "Nochmal spielen", base.WIDTH // 2 - 100,
+                                                base.HEIGHT // 2 - 100, 200, 50, base.GRAY, base.BLACK)
+        button_menu_rect = helper.draw_button(base.screen, "Zum Hauptmenü", base.WIDTH // 2 - 100, base.HEIGHT // 2,
+                                              200, 50, base.GRAY, base.BLACK)
+        button_close_rect = helper.draw_button(base.screen, "Schließen", base.WIDTH // 2 - 100, base.HEIGHT // 2 + 100,
+                                               200, 50, base.GRAY, base.BLACK)
 
         # Event-Handling für Klicken
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "quit"
 
-            #Hier sind die jeweiligen Bildschirme definiert, die dann bei Klick zurückgegeben werden
+            # Hier sind die jeweiligen Bildschirme definiert, die dann bei Klick zurückgegeben werden
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if button_close_rect.collidepoint(event.pos):
                     running_game_over_screen = False
@@ -244,6 +257,7 @@ def show_game_over(game_over_flag, text):
                     return "menu"
 
         pygame.display.flip()
+
 
 # Bildschirm der Einstellungen
 def settings_screen(entity_settings):
@@ -265,9 +279,10 @@ def settings_screen(entity_settings):
             y_offset += 50
 
         # Buttons zeichnen zum Speichern/Spielen
-        save_button_rect = helper.draw_button(base.screen, "Speichern und Spiel starten", 200, 600, 400, 50, base.GRAY, base.BLACK)
-        back_button_rect = helper.draw_button(base.screen, "Speichern und Zurück", 700, 600, 300, 50, base.GRAY, base.BLACK)
-
+        save_button_rect = helper.draw_button(base.screen, "Speichern und Spiel starten", 200, 600, 400, 50, base.GRAY,
+                                              base.BLACK)
+        back_button_rect = helper.draw_button(base.screen, "Speichern und Zurück", 700, 600, 300, 50, base.GRAY,
+                                              base.BLACK)
 
         # Event-Handling
         for event in pygame.event.get():
@@ -283,7 +298,6 @@ def settings_screen(entity_settings):
                 elif back_button_rect.collidepoint(event.pos):
                     entity_settings.update(local_settings)
                     return "menu"
-
 
                 for setting, rect in text_inputs.items():
                     if rect.collidepoint(event.pos):
@@ -307,9 +321,12 @@ def start_screen(entity_settings):
         base.screen.fill("white")
 
         # Buttons des Start-Bildschirms
-        start_button_rect = helper.draw_button(base.screen, "Start", base.WIDTH // 2 - 100, base.HEIGHT // 2 - 100, 200, 50, base.GRAY, base.BLACK)
-        settings_button_rect = helper.draw_button(base.screen, "Einstellungen", base.WIDTH // 2 - 100, base.HEIGHT // 2, 200, 50, base.GRAY, base.BLACK)
-        quit_button_rect = helper.draw_button(base.screen, "Schließen", base.WIDTH // 2 - 100, base.HEIGHT // 2 + 100, 200, 50, base.GRAY, base.BLACK)
+        start_button_rect = helper.draw_button(base.screen, "Start", base.WIDTH // 2 - 100, base.HEIGHT // 2 - 100, 200,
+                                               50, base.GRAY, base.BLACK)
+        settings_button_rect = helper.draw_button(base.screen, "Einstellungen", base.WIDTH // 2 - 100, base.HEIGHT // 2,
+                                                  200, 50, base.GRAY, base.BLACK)
+        quit_button_rect = helper.draw_button(base.screen, "Schließen", base.WIDTH // 2 - 100, base.HEIGHT // 2 + 100,
+                                              200, 50, base.GRAY, base.BLACK)
 
         # Event Handling
         for event in pygame.event.get():
@@ -327,6 +344,7 @@ def start_screen(entity_settings):
 
         pygame.display.flip()
 
+
 # Beim erneuten Spielen werden alle Werte auf die Anfangswerte gesetzt
 def reset_game_state(settings):
     global truck, mine, fabric, helicopter
@@ -335,7 +353,7 @@ def reset_game_state(settings):
     truck.pos.x, truck.pos.y = 500, 500
     truck.act_tank = 100
     truck.has_mineral = False
-    truck.tank_loss = float(settings["consumption_truck"]) / 100 #
+    truck.tank_loss = float(settings["consumption_truck"]) / 100  #
 
     # Mine
     mine.max_items = int(settings["mineral_amount"])
@@ -349,6 +367,7 @@ def reset_game_state(settings):
     helicopter.pos.x, helicopter.pos.y = 700, 200
     helicopter.has_mineral = False
 
+
 # Verwaltung der Spiel-Bildschirme
 def main():
     current_screen = "menu"
@@ -361,7 +380,7 @@ def main():
         elif current_screen == "settings":
             current_screen = settings_screen(game_settings)
         elif current_screen == "start_game":
-            #Beim Start des Spiels wird immer alles auf die Standardwerte zurückgesetzt
+            # Beim Start des Spiels wird immer alles auf die Standardwerte zurückgesetzt
             reset_game_state(game_settings)
             current_screen = "game"
         elif current_screen == "game":
@@ -375,6 +394,7 @@ def main():
 
     pygame.quit()
     sys.exit()
+
 
 # Starten der Hauptfunktion
 if __name__ == "__main__":

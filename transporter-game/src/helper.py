@@ -1,6 +1,8 @@
 import pygame
 
 from src import base
+
+
 # Eine Helper-Klasse mit allen Funktionen, die öfter benutzt werden, um in der Hauptklasse Code zu sparen
 
 # Methode, um zu bestimmen in welche Richtung bspw. der LKW zeigt
